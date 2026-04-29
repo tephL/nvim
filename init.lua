@@ -6,9 +6,9 @@ end
 
 -- line numbers
 vim.opt.number = true
-vim.opt.relativenumber = true 
+vim.opt.relativenumber = true
 
--- tab size 
+-- tab size
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.softtabstop = 4
@@ -17,13 +17,13 @@ vim.opt.expandtab = true
 -- colors
 vim.opt.termguicolors = true
 
--- netrw keymap (disabled for file tree plugin)
+-- disable netrw (using nvim-tree instead)
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
-vim.g.mapleader = '1'
--- vim.keymap.set('n', '<leader>e', '<cmd>Ex<CR>', { desc = 'Open netrw' })
 
--- nvim tree remap 
+vim.g.mapleader = '1'
+
+-- nvim-tree toggle
 vim.keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>", { noremap = true, silent = true })
 
 -- buffer switching
@@ -32,8 +32,24 @@ vim.keymap.set('n', '<S-Tab>', ':bprev<CR>')
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>')
 vim.opt.hidden = true
 
--- normal mode remap
+-- insert mode escape
 vim.keymap.set('i', 'jk', '<Esc>', { noremap = true, silent = true })
+
+-- emmet (use ,, instead of <Tab> to avoid conflict)
+vim.g.user_emmet_leader_key = ','
+vim.g.user_emmet_install_global = 0
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = { 'html', 'css', 'javascript' },
+  command = 'EmmetInstall'
+})
+
+-- filetype detection
+vim.filetype.add({
+  extension = {
+    html = 'html',
+    css  = 'css',
+  }
+})
 
 -- Bootstrap pckr
 local function bootstrap_pckr()
@@ -44,17 +60,17 @@ local function bootstrap_pckr()
   end
   vim.opt.rtp:prepend(pckr_path)
 end
-
 bootstrap_pckr()
 
 require('pckr').add({
   'neovim/nvim-lspconfig',
   'hrsh7th/nvim-cmp',
-  'hrsh7th/cmp-buffer',
   'hrsh7th/cmp-nvim-lsp',
+  'hrsh7th/cmp-buffer',
   'hrsh7th/cmp-path',
   'L3MON4D3/LuaSnip',
-    
+  'mattn/emmet-vim',
+
   {
     'nvim-tree/nvim-tree.lua',
     requires = { 'nvim-tree/nvim-web-devicons' },
@@ -67,18 +83,16 @@ require('pckr').add({
       })
     end,
   },
-  'mattn/emmet-vim',
-  'hrsh7th/cmp-buffer', -- words from open buffers
-  'hrsh7th/cmp-path',
 })
 
 -- Guard: only configure if plugins are installed
 local ok, cmp = pcall(require, 'cmp')
 if not ok then
-  vim.notify("nvim-cmp not installed yet. Run :PckrInstall then restart.", vim.log.levels.WARN)
+  vim.notify("nvim-cmp not installed yet. Run :Pckr install then restart.", vim.log.levels.WARN)
   return
 end
 
+-- single cmp.setup()
 cmp.setup({
   snippet = {
     expand = function(args)
@@ -93,53 +107,23 @@ cmp.setup({
   }),
   sources = cmp.config.sources({
     { name = 'nvim_lsp' },
-    { name = 'buffer' },
+    {
+      name = 'buffer',
+      option = {
+        get_bufnrs = function()
+          return { vim.api.nvim_get_current_buf() } -- current buffer only (saves RAM)
+        end
+      }
+    },
     { name = 'path' },
   }),
 })
 
+-- single LSP setup block
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lsp = require('lspconfig')
 
 lsp.intelephense.setup({ capabilities = capabilities })
-lsp.html.setup({ capabilities = capabilities })
 lsp.ts_ls.setup({ capabilities = capabilities })
-
-
-
-
--- random bs for front end go 
--- init.lua or lsp config file
-require('lspconfig').cssls.setup({
-  capabilities = capabilities  -- your existing nvim-cmp capabilities
-})
-
-require('lspconfig').html.setup({
-  capabilities = capabilities
-})
-
--- emmet
-vim.g.user_emmet_leader_key = '<Tab>'
-vim.g.user_emmet_install_global = 0
-
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = { 'html', 'css', 'javascript' },
-  command = 'EmmetInstall'
-})
-
--- better cmp
-require('cmp').setup({
-  sources = {
-    { name = 'nvim_lsp' },  -- you already have this
-    { name = 'buffer' },    -- add
-    { name = 'path' },      -- add
-  }
-})
-
--- filetypes 
-vim.filetype.add({
-  extension = {
-    html = 'html',
-    css  = 'css',
-  }
-})
+lsp.html.setup({ capabilities = capabilities })   -- once
+lsp.cssls.setup({ capabilities = capabilities })  -- once
