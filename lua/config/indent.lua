@@ -2,6 +2,7 @@ local indent = {
   html = 2,
   css = 2,
   javascript = 2,
+  typescript = 2,
   python = 4,
   c = 8,
 }
