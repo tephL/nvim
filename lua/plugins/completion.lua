@@ -5,7 +5,15 @@ return {
     dependencies = { "rafamadriz/friendly-snippets" },
     opts = {
       keymap = { preset = "default" }, -- Ctrl-y accept, Ctrl-n/p select, Ctrl-e close
-      sources = { default = { "lsp", "path", "snippets", "buffer" } },
+      sources = { 
+	default = { "lsp", "path", "snippets", "buffer" },
+	per_filetype = {
+	  typescript = { "lsp", "snippets", "buffer" },
+	  typescriptreact = { "lsp", "snippets", "buffer" },
+	  javascript = { "lsp", "snippets", "buffer" },
+	  javascriptreact = { "lsp", "snippets", "buffer" },
+	},
+      },
       completion = { documentation = { auto_show = true } },
       keymap = {
 	  preset = "enter",
