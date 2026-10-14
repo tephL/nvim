@@ -13,6 +13,9 @@ return {
       "bash",
       "json",
       "python",
+      "html",
+      "css",
+      "javascript",
     },
     highlight = {
       enable = true,
