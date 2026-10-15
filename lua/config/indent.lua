@@ -4,7 +4,8 @@ local indent = {
   javascript = 2,
   typescript = 2,
   python = 4,
-  c = 8,
+  c = 4,
+  java = 4
 }
 
 vim.api.nvim_create_autocmd("FileType", {
